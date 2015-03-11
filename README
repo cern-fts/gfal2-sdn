@@ -1,0 +1,5 @@
+gfal2-plugin-sdn
+================
+
+This plugin hooks to gfal2 events in order to provide feedback to an SDN
+controller before a copy takes place.
