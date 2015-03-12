@@ -20,6 +20,6 @@ add_subdirectory (dist)
 add_subdirectory (src)
 
 install (
-    FILES "README" "LICENSE" "RELEASE-NOTES"
+    FILES "README.md" "LICENSE" "RELEASE-NOTES"
     DESTINATION ${DOC_INSTALL_DIR}
 )
