@@ -5,24 +5,24 @@ controller before a copy takes place.
 
 How to build
 ------------
-1. Checkout the code
+* Checkout the code
 ```bash
 git clone git@github.com:cern-it-sdc-id/gfal2-sdn.git
 ```
-2. Add the Data Management Clients development repository
+* Add the Data Management Clients development repository
 ```bash
 wget http://grid-deployment.web.cern.ch/grid-deployment/dms/lcgutil/repos/lcgutil-continuous-el6.repo -P /etc/yum.repos.d
 ```
-2. Install the dependencies
+* Install the dependencies
 ```bash
 yum install cmake gfal2-devel libcurl-devel
 ```
-3. Create a directory for the build (remember to do it outside the source directory, or add it to .gitignore)
+* Create a directory for the build (remember to do it outside the source directory, or add it to .gitignore)
 ```bash
 mkdir build
 ```
 
-4. Run cmake, and compile
+* Run cmake, and compile
 ```bash
 cd build
 cmake -DCMAKE_BUILD_TYPE=DEBUG ..
@@ -47,7 +47,7 @@ Then, you will have to create a symlink to `build/src/libgfal_plugin_sdn.so` ins
 With this setup, the SDN plugins is ready to be loaded. A very simple way of telling is to run the following copy
 
 ```bash
-gfal-copy -fvv gsiftp://endpoint1/path gsifpt://endpoint2/path
+gfal-copy -fvv gsiftp://endpoint1/path gsiftp://endpoint2/path
 ```
 
 `-f ` tells gfal2 to overwrite the destination if it exists, and `-vv` tells gfal2-util to be a bit more verbose (`-v` only warnings, `-vv` warnings and messages, `-vvv` debug)
@@ -68,5 +68,5 @@ Which means the SDN plugin injected its own event listener before starting the c
 ```
 WARNING  Between endpoint1 and endpoint2 1 files with a total size of 123456 bytes
 ```
-With is printed by the plugin _before_ the copy started.
+With is printed by the plugin _before_ the copy starts.
 
