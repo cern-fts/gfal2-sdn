@@ -11,7 +11,7 @@ git clone git@github.com:cern-it-sdc-id/gfal2-sdn.git
 ```
 * Add the Data Management Clients development repository
 ```bash
-wget http://grid-deployment.web.cern.ch/grid-deployment/dms/lcgutil/repos/lcgutil-continuous-el6.repo -P /etc/yum.repos.d
+wget http://grid-deployment.web.cern.ch/grid-deployment/dms/dmc/repos/dmc-ci-el6.repo -P /etc/yum.repos.d
 ```
 * Install the dependencies
 ```bash
