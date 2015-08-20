@@ -1,7 +1,9 @@
+#include <assert.h>
 #include <glib.h>
 #include <gfal_plugins_api.h>
-#include <utils/gfal_uri.h>
+#include <regex.h>
 #include <string.h>
+#include <utils/gfal_uri.h>
 
 /**
  * Structure used to hold the different pairs notified by gfal2
@@ -92,7 +94,6 @@ void sdn_add_size(gpointer data, gpointer udata)
 
 
 /**
- * This is the "heart" of the plugin
  * When this enters, it has the list of files that will be transferred
  */
 void sdn_notify_remote(sdn_t* data)
@@ -117,15 +118,55 @@ void sdn_notify_remote(sdn_t* data)
             (long long)data->total_size);
 
     // PLACEHOLDER
-    // Build the message and submit to the SDN
 }
 
+/**
+ * When this enter, description holds a string as
+ * host:[ip]:port
+ * Note that ip is between brackets even for ipv4
+ */
+static void sdn_dest_pasv(const char* description)
+{
+    regex_t regex;
+    int retregex = regcomp(&regex, "([a-zA-Z0-9._-]+):\\[([0-9a-f.:]+)\\]:([0-9]+)", REG_EXTENDED);
+    assert(retregex == 0);
+
+    regmatch_t matches[4];
+    retregex = regexec(&regex, description, 4, matches, 0);
+    if (retregex == REG_NOMATCH) {
+        gfal2_log(G_LOG_LEVEL_CRITICAL, "The description could not be parsed: %s", description);
+        return;
+    }
+
+    // Host
+    char host[256];
+    size_t len = matches[1].rm_eo - matches[1].rm_so + 1; // Account for \0
+    if (len > sizeof(host))
+        len = sizeof(host);
+    g_strlcpy(host, description + matches[1].rm_so, len);
+
+
+    // IP
+    char ip[64];
+    len = matches[2].rm_eo - matches[2].rm_so + 1; // Account for \0
+    if (len > sizeof(ip))
+        len = sizeof(ip);
+    g_strlcpy(ip, description + matches[2].rm_so, len);
+
+    // Port
+    int port = atoi(description + matches[3].rm_so);
+
+    // PLACEHOLDER
+    gfal2_log(G_LOG_LEVEL_WARNING, "Got %s:%d for host %s", ip, port, host);
+}
 
 /**
  * This method is called by gfal2 and plugins
  */
 void sdn_event_listener(const gfalt_event_t e, gpointer user_data)
 {
+    const GQuark GFAL_GRIDFTP_PASV_STAGE_QUARK = g_quark_from_static_string("PASV");
+
     sdn_t* data = (sdn_t*)user_data;
 
     if (e->stage ==  GFAL_EVENT_LIST_ENTER) {
@@ -138,6 +179,9 @@ void sdn_event_listener(const gfalt_event_t e, gpointer user_data)
     }
     else if (e->stage == GFAL_EVENT_LIST_EXIT) {
         sdn_notify_remote(data);
+    }
+    else if (e->stage == GFAL_GRIDFTP_PASV_STAGE_QUARK) {
+        sdn_dest_pasv(e->description);
     }
 }
 
@@ -153,7 +197,6 @@ int sdn_copy_enter_hook(plugin_handle plugin_data, gfal2_context_t context,
     GError* tmp_error = NULL;
 
     // Register the new listener
-    // If there was one already, it will be released
     gfalt_add_event_callback(params, sdn_event_listener,
             sdn_create_data(context), sdn_release_data,
             &tmp_error);
