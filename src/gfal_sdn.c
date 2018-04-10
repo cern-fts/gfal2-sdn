@@ -3,7 +3,7 @@
 #include <gfal_plugins_api.h>
 #include <regex.h>
 #include <string.h>
-#include <utils/gfal_uri.h>
+#include <gfal2/utils/gfal2_uri.h>
 
 /**
  * Structure used to hold the different pairs notified by gfal2
@@ -98,7 +98,7 @@ void sdn_add_size(gpointer data, gpointer udata)
  */
 void sdn_notify_remote(sdn_t* data)
 {
-    gfal2_uri source, destination;
+    gfal2_uri *source, *destination;
 
     // Get the hostname and port
     GSequenceIter* iter = g_sequence_get_begin_iter(data->pairs);
@@ -106,15 +106,15 @@ void sdn_notify_remote(sdn_t* data)
         return;
 
     pair_t* pair = (pair_t*)g_sequence_get(iter);
-    gfal2_parse_uri(pair->source, &source, NULL);
-    gfal2_parse_uri(pair->destination, &destination, NULL);
+    source = gfal2_parse_uri(pair->source, NULL);
+    destination = gfal2_parse_uri(pair->destination, NULL);
 
     // Calculate the size
     data->total_size = 0;
     g_sequence_foreach(data->pairs, sdn_add_size, data);
 
     gfal2_log(G_LOG_LEVEL_WARNING, "Between %s and %s %d files with a total size of %lld bytes",
-            source.domain, destination.domain, g_sequence_get_length(data->pairs),
+            source->host, destination->host, g_sequence_get_length(data->pairs),
             (long long)data->total_size);
 
     // PLACEHOLDER
